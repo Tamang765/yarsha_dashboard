@@ -12,7 +12,6 @@ const Layout = () => {
   const onQueryChange = async (query) => {
     if (!query.country.trim() && !query.searchKey.trim()) return; // Don't fetch if query is empty
 
-    console.log(query); // Log the query object for debugging
     try {
       const response = await axiosInstance.get("/user/players/all", {
         params: {

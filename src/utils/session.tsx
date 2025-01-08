@@ -22,7 +22,6 @@ axiosInstance.interceptors.response.use(
 export default axiosInstance;
 
 export const setSession = (accessToken: string) => {
-  console.log(accessToken, "asdasd");
   if (accessToken) {
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   }

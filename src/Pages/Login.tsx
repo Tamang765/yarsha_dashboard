@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import axiosInstance, { setSession } from "../utils/session";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,7 +23,28 @@ const Login = () => {
         navigate("/player");
       }
     } catch (error) {
-      alert("Login failed");
+      console.log(error.message);
+      // alert("Login failed");
+    }
+  };
+
+  const handlePlayerLogin = async () => {
+    try {
+      const response = await axiosInstance.post("/player", {
+        email: email,
+        password: password,
+      });
+      console.log(response.data);
+      setSession(response.data.accessToken);
+
+      localStorage.setItem("user", JSON.stringify(response.data));
+      console.log(response);
+      if (response?.data?.role === "player") {
+        navigate("/player");
+      }
+    } catch (error) {
+      console.log(error.message);
+      // alert("Login as Player failed");
     }
   };
 
@@ -50,10 +72,20 @@ const Login = () => {
         </div>
         <button
           type="submit"
-          className="w-full p-2 text-white bg-blue-500 rounded"
+          className="w-full p-2 text-white bg-blue-500 rounded mb-4"
         >
           Login
         </button>
+
+        {/* Additional Button for Login as Player */}
+        <button
+          type="button"
+          onClick={handlePlayerLogin}
+          className="w-full p-2 text-white bg-green-500 rounded"
+        >
+          Login as Player
+        </button>
+
         <div className="mt-4 text-center">
           Don't have an account?{" "}
           <Link to="/register" className="text-blue-500">

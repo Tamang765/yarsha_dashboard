@@ -2,12 +2,13 @@ import { Navigate, useRoutes } from "react-router-dom";
 import AuthGuard from "./guard/AuthGuard";
 import GuestGuard from "./guard/GuestGuard";
 
-import Login from "./Pages/Login";
-import Register from "./Pages/Register";
 import Leaderboard from "./component/player/LeaderBoard";
 import PlayerTable from "./component/player/PlayerTable";
 import UserTable from "./component/user/UserTable";
 import Layout from "./layout/Layout";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import StaffDashboard from "./Pages/staff/StaffDashboard";
 
 export default function App() {
   return useRoutes([
@@ -25,21 +26,23 @@ export default function App() {
         },
         {
           path: "register",
-          element: <Register />,
+          element: (
+            <GuestGuard>
+              <Register />
+            </GuestGuard>
+          ),
         },
       ],
     },
-
     {
       path: "/admin",
       element: (
-        <AuthGuard>
+        <AuthGuard allowedRoles={["admin"]}>
           <Layout />
         </AuthGuard>
       ),
       children: [
         { element: <Navigate to={"/admin"} replace />, index: true },
-
         { path: "user-management", element: <UserTable /> },
         { path: "player-management", element: <PlayerTable /> },
         { path: "leaderboard", element: <Leaderboard /> },
@@ -48,26 +51,25 @@ export default function App() {
     {
       path: "/staff",
       element: (
-        <GuestGuard>
+        <AuthGuard allowedRoles={["staff"]}>
           <Layout />
-        </GuestGuard>
+        </AuthGuard>
       ),
       children: [
         { element: <Navigate to={"/staff"} replace />, index: true },
-
+        { path: "dashboard", element: <StaffDashboard /> },
         { path: "player-management", element: <PlayerTable /> },
       ],
     },
     {
       path: "/player",
       element: (
-        <GuestGuard>
+        <AuthGuard allowedRoles={["player"]}>
           <Layout />
-        </GuestGuard>
+        </AuthGuard>
       ),
       children: [
         { element: <Navigate to={"/player"} replace />, index: true },
-
         { path: "player-management", element: <PlayerTable /> },
       ],
     },

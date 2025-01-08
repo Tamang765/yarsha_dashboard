@@ -1,24 +1,22 @@
-import { ReactNode, useContext, useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useContext } from "react";
+import { Navigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import Login from "../Pages/Login";
 
 interface GuestGuardProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const GuestGuard = ({ children }: GuestGuardProps) => {
   const { isAuthenticated, user } = useContext(AuthContext);
-  const { pathname } = useLocation();
 
-  const [requestedLocation, setRequestedLocation] = useState<string | null>(
-    null
-  );
-  if (!isAuthenticated && user?.role !== "staff") {
-    if (pathname !== requestedLocation) {
-      setRequestedLocation(pathname);
+  if (isAuthenticated) {
+    if (user.role === "admin") {
+      return <Navigate to="/admin" />;
+    } else if (user.role === "staff") {
+      return <Navigate to="/staff" />;
+    } else if (user.role === "player") {
+      return <Navigate to="/player" />;
     }
-    return <Login />;
   }
 
   return <>{children}</>;

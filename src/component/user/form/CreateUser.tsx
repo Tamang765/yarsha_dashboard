@@ -52,7 +52,7 @@ const CreateUser = ({ user, close }: any) => {
   };
 
   return (
-    <div className="min-w-3xl mx-auto mt-10 p-6 bg-white ">
+    <div className="min-w-4xl  mx-auto mt-10 p-6 bg-white ">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
         {user ? "Edit" : `Create`} User
       </h1>
@@ -110,14 +110,14 @@ const CreateUser = ({ user, close }: any) => {
           >
             <option value="admin">Admin</option>
             <option value="staff">Staff</option>
-            <option value="player">Player</option>
+            {/* <option value="player">Player</option> */}
           </select>
         </div>
         <button
           type="submit"
           className="w-full py-3 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
-          Create User
+          {user ? "Edit" : `Create`} User
         </button>
       </form>
     </div>

@@ -54,6 +54,11 @@ const reducer = (state: AuthState, action: AuthAction): AuthState => {
         user: action.payload?.user || null,
       };
     case "LOGIN":
+      return {
+        ...state,
+        isAuthenticated: true,
+        user: action.payload?.user || null,
+      };
     case "REGISTER":
       return {
         ...state,
@@ -95,21 +100,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (parsedUser) {
         setSession(parsedUser?.accessToken);
         const response = await axiosInstance.get(`user/${parsedUser.id}`);
-        if (response.data.role === "admin") {
-          navigate("/admin");
-        }
-        if (response.data.role === "staff") {
-          navigate("/staff");
-        }
-        if (response.data.role === "player") {
-          navigate("/player");
-        }
-        console.log(response.data);
+        const user = response.data;
+
+        dispatch({
+          type: "INITIAL",
+          payload: {
+            isAuthenticated: true,
+            user,
+          },
+        });
+      } else {
+        dispatch({
+          type: "INITIAL",
+          payload: {
+            isAuthenticated: false,
+            user: null,
+          },
+        });
       }
     } catch (error) {
       console.error(error);
+      dispatch({
+        type: "INITIAL",
+        payload: {
+          isAuthenticated: false,
+          user: null,
+        },
+      });
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     initialize();
@@ -117,12 +136,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // LOGIN
   const login = useCallback(async (email: string, password: string) => {
-    const response = await axiosInstance.post("player", {
+    const response = await axiosInstance.post("user/login", {
       email,
       password,
     });
 
     const { accessToken } = response.data;
+
     if (response.data) {
       setSession(accessToken);
       localStorage.setItem("user", JSON.stringify(response.data));

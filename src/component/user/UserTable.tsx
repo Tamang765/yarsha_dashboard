@@ -24,40 +24,10 @@ const UserTable: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [rowsPerPage] = useState(10); // Rows per page
-  const [sortColumn, setSortColumn] = useState<keyof User>("id"); // Sorting column
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc"); // Sorting direction
   const [isEditing, setIsEditing] = useState(false); // Editing state
   const [createNew, setCreateNew] = useState(false); // Editing state
 
   const [editUser, setEditUser] = useState<User | null>(null); // User being edited
-
-  // Pagination logic
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentData = data?.slice(indexOfFirstRow, indexOfLastRow) || [];
-
-  // Sorting logic
-  const sortedData = [...currentData].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
-
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortDirection === "asc"
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-    return 0;
-  });
-
-  // Handle column sorting
-  const handleSort = (column: keyof User) => {
-    if (sortColumn === column) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
 
   // Handle delete action
   const handleDelete = async (id: string) => {
@@ -77,32 +47,12 @@ const UserTable: React.FC = () => {
     setEditUser(user);
   };
 
-  // Save edited user
-  const saveEdit = () => {
-    if (editUser) {
-      const updatedData = data?.map((user) =>
-        user.id === editUser.id ? editUser : user
-      );
-      setData(updatedData);
-      setIsEditing(false);
-      setEditUser(null);
-    }
-  };
-
-  // Handle input changes in the edit modal
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (editUser) {
-      setEditUser({ ...editUser, [e.target.name]: e.target.value });
-    }
-  };
-
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   // Calculate total pages
-  const totalPages = Math.ceil((data?.length || 0) / rowsPerPage);
 
   // Fetch data (mock data for now)
   useEffect(() => {
@@ -120,6 +70,7 @@ const UserTable: React.FC = () => {
     fetchData();
   }, [currentPage, rowsPerPage]);
 
+  
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center py-10">
       <div className="container mx-auto">
@@ -135,44 +86,25 @@ const UserTable: React.FC = () => {
 
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <table className="table-auto w-full border-collapse border border-gray-200">
-            <thead className="bg-teal-600 text-white">
+            <thead className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
               <tr>
-                <th
-                  className="px-6 py-3 border border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("id")}
-                >
+                <th className="px-6 py-3 border border-gray-200 cursor-pointer">
                   ID{" "}
-                  {sortColumn === "id" && (sortDirection === "asc" ? "▲" : "▼")}
                 </th>
-                <th
-                  className="px-6 py-3 border border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("name")}
-                >
+                <th className="px-6 py-3 border border-gray-200 cursor-pointer">
                   Name{" "}
-                  {sortColumn === "name" &&
-                    (sortDirection === "asc" ? "▲" : "▼")}
                 </th>
-                <th
-                  className="px-6 py-3 border border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("email")}
-                >
+                <th className="px-6 py-3 border border-gray-200 cursor-pointer">
                   Email{" "}
-                  {sortColumn === "email" &&
-                    (sortDirection === "asc" ? "▲" : "▼")}
                 </th>
-                <th
-                  className="px-6 py-3 border border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("role")}
-                >
+                <th className="px-6 py-3 border border-gray-200 cursor-pointer">
                   Role{" "}
-                  {sortColumn === "role" &&
-                    (sortDirection === "asc" ? "▲" : "▼")}
                 </th>
                 <th className="px-6 py-3 border border-gray-200">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {sortedData.map((user) => (
+              {data.map((user) => (
                 <tr className="bg-gray-50 text-gray-700" key={user.id}>
                   <td className="px-6 py-4 border border-gray-200 text-center">
                     {user.id}

@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp, Edit, Eye, Trash2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import AuthGuard from "../../guard/AuthGuard";
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import axiosInstance from "../../utils/session";
 import { Meta } from "../user/UserTable";
 import PlayerForm from "./PlayerForm";
@@ -26,6 +26,7 @@ type User = {
 };
 
 const PlayerTable: React.FC = () => {
+  const { user: currentUser } = useContext(AuthContext);
   const [data, setData] = useState<User[]>([]);
   const [selectedStats, setSelectedStats] = useState<{
     coins: number;
@@ -42,35 +43,9 @@ const PlayerTable: React.FC = () => {
     "id"
   );
 
-  const [isActive, setIsActive] = useState<boolean>(false); // [isActive, setActive]
-
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [isEditing, setIsEditing] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
-
-  // Sorting logic
-  const sortedData = [...data].sort((a, b) => {
-    let aValue =
-      sortColumn in a
-        ? a[sortColumn as keyof User]
-        : a.statistics[sortColumn as keyof Statistics];
-    let bValue =
-      sortColumn in b
-        ? b[sortColumn as keyof User]
-        : b.statistics[sortColumn as keyof Statistics];
-
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortDirection === "asc"
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-
-    if (typeof aValue === "number" && typeof bValue === "number") {
-      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-    }
-
-    return 0;
-  });
 
   const handleSort = (column: keyof User | keyof Statistics) => {
     if (sortColumn === column) {
@@ -88,23 +63,6 @@ const PlayerTable: React.FC = () => {
   const handleEdit = (user: User) => {
     setIsEditing(true);
     setEditUser(user);
-  };
-
-  const saveEdit = () => {
-    if (editUser) {
-      const updatedData = data.map((user) =>
-        user.id === editUser.id ? editUser : user
-      );
-      setData(updatedData);
-      setIsEditing(false);
-      setEditUser(null);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (editUser) {
-      setEditUser({ ...editUser, [e.target.name]: e.target.value });
-    }
   };
 
   const handlePageChange = (page: number) => {
@@ -135,9 +93,9 @@ const PlayerTable: React.FC = () => {
       }
     };
     fetchData();
-  }, [currentPage, rowsPerPage, isActive]);
+  }, [currentPage, rowsPerPage]);
 
-  const toggleSwitch = async (userId: string, currentState: boolean) => {
+  const toggleSwitch = async (userId: string) => {
     try {
       // Call the API to toggle the state
       const response = await axiosInstance.patch(
@@ -233,7 +191,7 @@ const PlayerTable: React.FC = () => {
                           //   <span className="text-gray-500">Loading...</span>
                           // ) : (
                           <button
-                            onClick={() => toggleSwitch(user.id, user?.active)}
+                            onClick={() => toggleSwitch(user.id)}
                             className={`relative inline-flex h-6 w-12 rounded-full transition-colors focus:outline-none ${
                               user.active ? "bg-green-500" : "bg-gray-300"
                             }`}
@@ -272,7 +230,7 @@ const PlayerTable: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {user.statistics.games_won}
                     </td> */}
-                    <AuthGuard>
+                    {currentUser?.role !== "staff" && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           className="text-indigo-600 hover:text-indigo-900 mr-4"
@@ -287,7 +245,7 @@ const PlayerTable: React.FC = () => {
                           <Trash2 className="h-5 w-5" />
                         </button>
                       </td>
-                    </AuthGuard>
+                    )}
                   </tr>
                 ))}
               </tbody>
